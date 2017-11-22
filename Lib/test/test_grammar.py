@@ -1094,6 +1094,15 @@ class GrammarTests(unittest.TestCase):
         L.sort(key=lambda x: x if isinstance(x, tuple) else ())
         self.assertEqual(str(L), '[1, (1,), (1, 2), (1, 2, 3)]')
 
+        d = {}
+        d[1] = 1
+        d[*(1,),] = 2
+        d[1,*(2,)] = 3
+        d[*(1,),*(2,3,)] = 4
+        L = list(d)
+        L.sort(key=lambda x: x if isinstance(x, tuple) else ())
+        self.assertEqual(str(L), '[1, (1,), (1, 2), (1, 2, 3)]')
+
     def test_atoms(self):
         ### atom: '(' [testlist] ')' | '[' [testlist] ']' | '{' [dictsetmaker] '}' | NAME | NUMBER | STRING
         ### dictsetmaker: (test ':' test (',' test ':' test)* [',']) | (test (',' test)* [','])

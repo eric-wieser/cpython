@@ -599,6 +599,7 @@ struct compiling {
 static asdl_seq *seq_for_testlist(struct compiling *, const node *);
 static expr_ty ast_for_expr(struct compiling *, const node *);
 static stmt_ty ast_for_stmt(struct compiling *, const node *);
+static expr_ty ast_for_starred(struct compiling *, const node *);
 static asdl_seq *ast_for_body(struct compiling *c, const node *n,
                               string *docstring);
 static string docstring_from_stmts(asdl_seq *stmts);
@@ -2252,13 +2253,19 @@ ast_for_slice(struct compiling *c, const node *n)
     */
     ch = CHILD(n, 0);
     if (NCH(n) == 1 && TYPE(ch) == test) {
-        /* 'step' variable hold no significance in terms of being used over
-           other vars */
-        step = ast_for_expr(c, ch);
-        if (!step)
+        expr_ty val = ast_for_expr(c, ch);
+        if (!val)
             return NULL;
 
-        return Index(step, c->c_arena);
+        return Index(val, c->c_arena);
+    }
+
+    if (NCH(n) == 1 && TYPE(ch) == star_expr) {
+        expr_ty val = ast_for_starred(c, ch);
+        if (!val)
+            return NULL;
+
+        return Index(val, c->c_arena);
     }
 
     if (TYPE(ch) == test) {
